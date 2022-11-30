@@ -17,7 +17,7 @@ public class MemberRepository {
     private static final String INSERT = "INSERT INTO member(name, username, password, role, address, created_at, updated_at) VALUES(:name, :username, :password, :role, :address, :created_at, :updated_at)";
     private static final String FIND_BY_ID = "select * from member where id = :id";
     private static final String FIND_ALL = "select * from member";
-    private static final String UPDATE = "update member set password = :password, role = :role, address = :address, updated_at = :updated_at where id = :id";
+    private static final String UPDATE = "update member set password = :password, role = :role, address = :address where id = :id";
     private static final String DELETE = "delete from member where id = :id";
 
     private static final String ID = "id";
@@ -49,42 +49,49 @@ public class MemberRepository {
         return Member.getInstance(id, name, username, password, role, address, createdAt, updatedAt);
     };
 
-//    public void save(Member Member) {
-//        Map<String, Object> parameters = Map.of(
-//                ID, Member.getId().toString(),
-//                Member_TYPE, Member.getMemberType().toString(),
-//                DISCOUNT_AMOUNT, Member.getDiscountAmount());
-//        jdbcTemplate.update(INSERT, parameters);
-//    }
-//
+    public void save(Member Member) {
+        Map<String, Object> parameters = Map.of(
+                ID, Member.getId().toString(),
+                NAME, Member.getName(),
+                USERNAME, Member.getUsername(),
+                PASSWORD, Member.getPassword(),
+                ROLE, Member.getRole().toString(),
+                ADDRESS, Member.getAddress(),
+                CREATED_AT, Member.getCreatedAt(),
+                UPDATED_AT, Member.getUpdatedAt());
+        jdbcTemplate.update(INSERT, parameters);
+    }
+
 //    public List<Member> findAll() {
 //        return jdbcTemplate.query(FIND_ALL, ROW_MAPPER);
 //    }
-//
-//    public Optional<Member> findById(UUID id) {
-//        return Optional.ofNullable(jdbcTemplate.queryForObject(
-//                FIND_BY_ID,
-//                Collections.singletonMap(ID, id.toString()),
-//                ROW_MAPPER));
-//    }
-//
-//    public void update(Member Member) {
-//        Map<String, Object> parameters = Map.of(
-//                DISCOUNT_AMOUNT, Member.getDiscountAmount(),
-//                ID, Member.getUUID().toString());
-//        int update = jdbcTemplate.update(UPDATE, parameters);
+
+    public Optional<Member> findById(Long id) {
+        return Optional.ofNullable(jdbcTemplate.queryForObject(
+                FIND_BY_ID,
+                Collections.singletonMap(ID, id),
+                ROW_MAPPER));
+    }
+
+    public void update(Member member) {
+        Map<String, Object> parameters = Map.of(
+            PASSWORD, member.getPassword(),
+            ROLE, member.getRole().toString(),
+            ADDRESS, member.getAddress(),
+            ID, member.getId());
+        int update = jdbcTemplate.update(UPDATE, parameters);
 //        if (update == ZERO) {
 //            throw new DataModifyingException(
-//                    "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
-//                    CommonErrorCode.DATA_MODIFYING_ERROR);
+//                "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
+//                CommonErrorCode.DATA_MODIFYING_ERROR);
 //        }
-//    }
-//
-//    public void delete(UUID id) {
-//        int update = jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
+    }
+
+    public void delete(Long id) {
+        int update = jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
 //        if (update == ZERO) {
 //            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
 //                    , CommonErrorCode.DATA_MODIFYING_ERROR);
 //        }
-//    }
+    }
 }

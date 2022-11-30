@@ -3,6 +3,7 @@ package com.prgrms.merskkurly.domain.member.entity;
 import com.prgrms.merskkurly.domain.common.exception.domain.ArgumentOutOfBoundException;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static com.prgrms.merskkurly.domain.member.util.MemberValidateFields.*;
 
