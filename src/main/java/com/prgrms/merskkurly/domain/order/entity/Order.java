@@ -2,12 +2,8 @@ package com.prgrms.merskkurly.domain.order.entity;
 
 import com.prgrms.merskkurly.domain.common.exception.domain.ArgumentOutOfBoundException;
 import com.prgrms.merskkurly.domain.common.exception.domain.IllegalOrderStateException;
-import com.prgrms.merskkurly.domain.order.util.OrderValidateFields;
-import com.prgrms.merskkurly.domain.orderitem.OrderItem;
-import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static com.prgrms.merskkurly.domain.order.entity.OrderStatus.*;
 import static com.prgrms.merskkurly.domain.order.util.OrderValidateFields.*;
@@ -26,7 +22,7 @@ public class Order {
         this.id = BEFORE_INITIALIZED_ID;
         this.memberId = BEFORE_INITIALIZED_ID;
         this.address = address;
-        this.orderStatus = ACCEPTED;
+        this.orderStatus = PAYED;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -54,32 +50,41 @@ public class Order {
         return order;
     }
 
-    public void accept(){
-        if(orderStatus == ACCEPTED || orderStatus == SETTLED){
-            throw new IllegalOrderStateException(CANCEL.name(), orderStatus.name());
+    public void update(String newAddress) {
+        if(orderStatus == CONFIRMED){
+            throw new IllegalOrderStateException(CONFIRMED.name());
         }
-        orderStatus = ACCEPTED;
+        validateAddress(newAddress);
+
+        address = newAddress;
+    }
+
+    public void pay() {
+        if(orderStatus != CANCELED){
+            throw new IllegalOrderStateException(PAYED.name(), orderStatus.name());
+        }
+        orderStatus = PAYED;
     }
 
     public void cancel() {
-        if(orderStatus == CANCEL || orderStatus == SETTLED){
-            throw new IllegalOrderStateException(CANCEL.name(), orderStatus.name());
+        if(orderStatus != PAYED){
+            throw new IllegalOrderStateException(CANCELED.name(), orderStatus.name());
         }
-        orderStatus = CANCEL;
+        orderStatus = CANCELED;
     }
 
-    public void readyForDelivery() {
-        if(orderStatus == READY_FOR_DELIVERY || orderStatus == CANCEL){
-            throw new IllegalOrderStateException(READY_FOR_DELIVERY.name(), orderStatus.name());
+    public void delivery() {
+        if(orderStatus != PAYED){
+            throw new IllegalOrderStateException(ON_DELIVERY.name(), orderStatus.name());
         }
-        orderStatus = READY_FOR_DELIVERY;
+        orderStatus = ON_DELIVERY;
     }
 
-    public void settle() {
-        if(orderStatus == SETTLED || orderStatus == ACCEPTED || orderStatus == CANCEL){
-            throw new IllegalOrderStateException(SETTLED.name(), orderStatus.name());
+    public void confirm() {
+        if(orderStatus != ON_DELIVERY){
+            throw new IllegalOrderStateException(CONFIRMED.name(), orderStatus.name());
         }
-        orderStatus = SETTLED;
+        orderStatus = CONFIRMED;
     }
 
     public Long getId() {
@@ -110,10 +115,5 @@ public class Order {
         if(address.length() < MIN_ADDRESS || MAX_ADDRESS < address.length()){
             throw new ArgumentOutOfBoundException(ADDRESS_FIELD_NAME, MIN_ADDRESS, MAX_ADDRESS, address.length());
         }
-    }
-
-    public void update(String newAddress, OrderStatus newOrderStatus) {
-        address = newAddress;
-        orderStatus = orderStatus;
     }
 }

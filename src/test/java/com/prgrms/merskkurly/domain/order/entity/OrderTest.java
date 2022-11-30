@@ -2,7 +2,6 @@ package com.prgrms.merskkurly.domain.order.entity;
 
 import com.prgrms.merskkurly.domain.common.exception.domain.ArgumentOutOfBoundException;
 import com.prgrms.merskkurly.domain.common.exception.domain.IllegalOrderStateException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,12 +22,15 @@ class OrderTest {
      * 주문 정보를 수정할 수 있음
      *  - 배송중, 혹은 배송 완료 상태라면 주문을 수정할 수 없음
      *  - 이메일, 주소, 주문 상태를 수정할 수 있고, updatedAt는 자동으로 수정됨
-     *  - 주문을 취소할 수 있음
-     *   - 주문 상태가 "배송 확정"이라면 주문을 취소할 수 없음
-     *  생성된 주문 상태를 "배송 준비" 상태로 만들 수 있음
-     *   - 생성된 주문 상태를 "배송 확정" 상태로 만드려고 할 시 상태 변경 실패
-     *  배송 준비(배송 중인) 상태의 주문 상태를 "배송 확정" 상태로 만들 수 있음
-     *   - 배송 확정 상태의 모든 주문 정보를 수정하려고 할 때 상태 변경 실패
+     *  - payed 상태의 주문을 cancel 상태로 만들 있음
+     *  - 주문 생성 시, 혹은 취소된 주문을 payed상태로 만들 수 있음
+     *  - 결제완료된 주문을 on_delivery상태로 만들 수 있음
+     *  - 배송 중인 주문을 settled 상태로 만들 수 있음
+     *
+     *   - PAYED: CANCELED 상태가 아닐 때 pay을 호출하면 예외 발생
+     *   - ON_DELIVERY: PAYED 상태가 아닐 때 delivery를 호출하면 예외 발생
+     *   - SETTLED: ON_DELIVERY 상태가 아닐 때 settle를 호출하면 예외 발생
+     *   - CANCELED: PAYED 상태가 아닐 떄 cancel을 호출하면 예외 발생
      */
 
     @Test
@@ -42,7 +44,7 @@ class OrderTest {
 
         //then
         assertThat(order.getAddress()).isEqualTo(address);
-        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.ACCEPTED);
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.PAYED);
     }
 
     @ParameterizedTest
@@ -83,49 +85,47 @@ class OrderTest {
         return Order.newInstance(address);
     }
 
-    @ParameterizedTest
-    @CsvSource({"CANCEL", "READY_FOR_DELIVERY"})
-    @DisplayName("주문 취소, 혹은 배송 준비 상태의 주문을 확정할 수 있습니다")
-    void acceptOrder(String OrderStatusString) {
+    @Test
+    @DisplayName("CANCELED 상태의 주문을 pay할 수 있습니다")
+    void payOrder() {
         //given
-        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.valueOf(OrderStatusString), LocalDateTime.now(), LocalDateTime.now());
+        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.CANCELED, LocalDateTime.now(), LocalDateTime.now());
 
         //when
-        order.accept();
+        order.pay();
 
-        // then
-        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.ACCEPTED);
+        //then
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.PAYED);
     }
 
     @ParameterizedTest
-    @CsvSource({"ACCEPTED", "SETTLED"})
-    @DisplayName("주문 확정, 혹은 배송 완료 상태의 주문을 확정할 수 없습니다")
-    void acceptOrderFailure(String OrderStatusString) {
+    @CsvSource({"PAYED", "ON_DELIVERY", "CONFIRMED"})
+    @DisplayName("CANCELD 상태의 주문을 pay할 수 없습니다")
+    void payOrderFailure(String OrderStatusString) {
         //given
         Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.valueOf(OrderStatusString), LocalDateTime.now(), LocalDateTime.now());
 
         //when&then
-        assertThrows(IllegalOrderStateException.class, order::accept);
+        assertThrows(IllegalOrderStateException.class, order::pay);
     }
 
-    @ParameterizedTest
-    @CsvSource({"ACCEPTED", "READY_FOR_DELIVERY"})
-    @DisplayName("주문 확정, 혹은 배송 준비 상태의 주문을 취소할 수 있습니다")
-    void cancelOrder(String OrderStatusString) {
+    @Test
+    @DisplayName("PAYED 상태의 주문을 cancel할 수 있습니다")
+    void cancelOrder() {
         //given
-        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.valueOf(OrderStatusString), LocalDateTime.now(), LocalDateTime.now());
+        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.PAYED, LocalDateTime.now(), LocalDateTime.now());
 
         //when
         order.cancel();
 
-        // then
-        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.CANCEL);
+        //then
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.CANCELED);
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"SETTLED", "CANCEL"})
-    @DisplayName("배달 완료 상태, 혹은 이미 취소된 주문을 취소할 수 없습니다")
-    void cancelOrderFailed(String orderStatusString) {
+    @CsvSource(value = {"ON_DELIVERY", "CONFIRMED", "CANCELED"})
+    @DisplayName("PAYED 상태가 아니면 주문을 cancel할 수 없습니다")
+    void cancelOrderFailure(String orderStatusString) {
         //given
         Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.valueOf(orderStatusString), LocalDateTime.now(), LocalDateTime.now());
 
@@ -133,65 +133,62 @@ class OrderTest {
         assertThrows(IllegalOrderStateException.class, order::cancel);
     }
 
-    @ParameterizedTest
-    @CsvSource(value = {"ACCEPTED", "SETTLED"})
-    @DisplayName("주문 확정, 혹은 배달 완료 상태의 주문 상태를 배송 준비 상태로 만들 수 있습니다")
-    void orderSetReadyForDelivery(String orderStatusString) {
+    @Test
+    @DisplayName("PAYED 상태의 주문을 delivery할 수 있습니다")
+    void deliveryOrder() {
         //given
-        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.valueOf(orderStatusString), LocalDateTime.now(), LocalDateTime.now());
+        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.PAYED, LocalDateTime.now(), LocalDateTime.now());
 
         //when
-        order.readyForDelivery();
+        order.delivery();
 
         //then
-        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.READY_FOR_DELIVERY);
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.ON_DELIVERY);
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"READY_FOR_DELIVERY", "CANCEL"})
-    @DisplayName("주문 확정, 혹은 배달 완료 상태의 주문 상태를 배송 준비 상태로 만들 수 있습니다")
-    void readyForDelieryFailure(String orderStatusString) {
+    @CsvSource(value = {"ON_DELIVERY", "CONFIRMED", "CANCELED"})
+    @DisplayName("PAYED 상태가 아닌 주문을 delivery할 수 없습니다")
+    void deliveryOrderFailure(String orderStatusString) {
         //given
         Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.valueOf(orderStatusString), LocalDateTime.now(), LocalDateTime.now());
 
         //when&then
-        assertThrows(IllegalOrderStateException.class, order::readyForDelivery);
+        assertThrows(IllegalOrderStateException.class, order::delivery);
     }
 
     @Test
-    @DisplayName("배송 준비 상태의 주문 상태를 배송 확정 상태로 만들 수 있습니다")
-    void settleOrder() {
+    @DisplayName("ON_DELIVERY상태의 주문을 confirm할 수 있습니다")
+    void confirmOrder() {
         //given
-        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.READY_FOR_DELIVERY, LocalDateTime.now(), LocalDateTime.now());
+        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.ON_DELIVERY, LocalDateTime.now(), LocalDateTime.now());
 
         //when
-        order.settle();
+        order.confirm();
 
         //then
-        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.SETTLED);
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.CONFIRMED);
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"ACCEPTED", "SETTLED", "CANCEL"})
-    @DisplayName("주문 확정, 배송 완료, 혹은 주문 취소 상태의 주문 상태를 배송 확정 상태로 만들 수 없습니다")
-    void orderSetSettledFailed(String orderStatusString) {
+    @CsvSource(value = {"PAYED", "CONFIRMED", "CANCELED"})
+    @DisplayName("ON_DELIVERY 상태의 주문을 confirm할 수 없습니다")
+    void confirmOrderFailure(String orderStatusString) {
         //given
         Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.valueOf(orderStatusString), LocalDateTime.now(), LocalDateTime.now());
 
         //when&then
-        assertThrows(IllegalOrderStateException.class, order::settle);
+        assertThrows(IllegalOrderStateException.class, order::confirm);
     }
 
     @Test
     @DisplayName("배송 확정 상태의 모든 주문 정보를 수정하려고 할 때 상태 변경 실패")
     void updateOrderFailedSettledOrder() {
         //given
-        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.SETTLED, LocalDateTime.now(), LocalDateTime.now());
+        Order order = Order.getInstance(0L, 0L, "경기도 성남시 분당구 판교동 123-234", OrderStatus.CONFIRMED, LocalDateTime.now(), LocalDateTime.now());
         String newAddress = "newAddress12345667789";
-        OrderStatus newOrderStatus = OrderStatus.ACCEPTED;
 
         //when&then
-        assertThrows(IllegalOrderStateException.class, () -> order.update(newAddress, newOrderStatus));
-
+        assertThrows(IllegalOrderStateException.class, () -> order.update(newAddress));
     }
 }
