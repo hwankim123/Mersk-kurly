@@ -3,11 +3,12 @@ package com.prgrms.merskkurly.domain.member.repository;
 import com.prgrms.merskkurly.domain.member.entity.Member;
 import com.prgrms.merskkurly.domain.member.entity.Role;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -16,7 +17,6 @@ public class MemberRepository {
 
     private static final String INSERT = "INSERT INTO member(name, username, password, role, address, created_at, updated_at) VALUES(:name, :username, :password, :role, :address, :created_at, :updated_at)";
     private static final String FIND_BY_ID = "select * from member where id = :id";
-    private static final String FIND_ALL = "select * from member";
     private static final String UPDATE = "update member set password = :password, role = :role, address = :address where id = :id";
     private static final String DELETE = "delete from member where id = :id";
 
@@ -49,22 +49,31 @@ public class MemberRepository {
         return Member.getInstance(id, name, username, password, role, address, createdAt, updatedAt);
     };
 
-    public void save(Member Member) {
+    public Member save(Member member) {
+        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
         Map<String, Object> parameters = Map.of(
-                ID, Member.getId().toString(),
-                NAME, Member.getName(),
-                USERNAME, Member.getUsername(),
-                PASSWORD, Member.getPassword(),
-                ROLE, Member.getRole().toString(),
-                ADDRESS, Member.getAddress(),
-                CREATED_AT, Member.getCreatedAt(),
-                UPDATED_AT, Member.getUpdatedAt());
-        jdbcTemplate.update(INSERT, parameters);
-    }
+                NAME, member.getName(),
+                USERNAME, member.getUsername(),
+                PASSWORD, member.getPassword(),
+                ROLE, member.getRole().toString(),
+                ADDRESS, member.getAddress(),
+                CREATED_AT, member.getCreatedAt(),
+                UPDATED_AT, member.getUpdatedAt());
 
-//    public List<Member> findAll() {
-//        return jdbcTemplate.query(FIND_ALL, ROW_MAPPER);
-//    }
+        int update = jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
+            generatedKeyHolder);
+
+        Long id = generatedKeyHolder.getKeyAs(Long.class);
+        return Member.getInstance(
+            id,
+            member.getName(),
+            member.getUsername(),
+            member.getPassword(),
+            member.getRole(),
+            member.getAddress(),
+            member.getCreatedAt(),
+            member.getUpdatedAt());
+    }
 
     public Optional<Member> findById(Long id) {
         return Optional.ofNullable(jdbcTemplate.queryForObject(

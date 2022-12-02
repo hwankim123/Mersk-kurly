@@ -5,21 +5,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.prgrms.merskkurly.domain.member.entity.Member;
 import com.prgrms.merskkurly.domain.member.entity.Role;
-import java.time.LocalDateTime;
 import java.util.Optional;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest
 class MemberRepositoryTest {
+
+  Logger logger = LoggerFactory.getLogger("MemberRepositoryTest");
 
   @Autowired
   MemberRepository memberRepository;
@@ -54,8 +54,12 @@ class MemberRepositoryTest {
         Role.USER,
         "경기도 성남시 분당구 판교동");
 
-    //when&then
-    memberRepository.save(member);
+    //when
+    Member savedMember = memberRepository.save(member);
+
+    //then
+    logger.info(savedMember.getId().toString());
+    assertThat(savedMember.getName()).isEqualTo(member.getName());
   }
 
   @Test
@@ -69,13 +73,13 @@ class MemberRepositoryTest {
     String address = "경기도 성남시 분당구 판교동";
     Member member = createSingleMember(name, username, password, role, address);
 
-    memberRepository.save(member);
+    Member savedMember = memberRepository.save(member);
 
     //when
-    Optional<Member> findMember = memberRepository.findById(1L);
+    Optional<Member> findMember = memberRepository.findById(savedMember.getId());
 
     //then
-    assertThat(findMember.isPresent()).isTrue();
+    assertThat(findMember).isPresent();
     assertThat(findMember.get().getName()).isEqualTo(name);
     assertThat(findMember.get().getUsername()).isEqualTo(username);
     assertThat(findMember.get().getPassword()).isEqualTo(password);
@@ -102,8 +106,8 @@ class MemberRepositoryTest {
     String address = "경기도 성남시 분당구 판교동";
     Member member = createSingleMember(name, username, password, role, address);
 
-    memberRepository.save(member);
-    Member findMember = memberRepository.findById(1L).get();
+    Member savedMember = memberRepository.save(member);
+    Member findMember = memberRepository.findById(savedMember.getId()).get();
 
     //when
     String newPassword = "newPassword";
@@ -130,17 +134,14 @@ class MemberRepositoryTest {
     String address = "경기도 성남시 분당구 판교동";
     Member member = createSingleMember(name, username, password, role, address);
 
-    memberRepository.save(member);
-    Member findMember = memberRepository.findById(1L).get();
-
+    Member savedMember = memberRepository.save(member);
+    Member findMember = memberRepository.findById(savedMember.getId()).get();
     //when
     memberRepository.delete(findMember.getId());
-    Optional<Member> memberAfterUpdate = memberRepository.findById(findMember.getId());
 
     //then
-    assertThat(memberAfterUpdate.isEmpty()).isEqualTo(true);
+    assertThrows(EmptyResultDataAccessException.class, () -> memberRepository.findById(findMember.getId()));
   }
 
-  //Repository.save() 가 Entity를 반환하도록
   //Repository 에서의 exception 처리
 }
