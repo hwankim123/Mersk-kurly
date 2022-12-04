@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class OrderItem {
     private final Long BEFORE_INITIALIZED_ID = 0L;
     private final Long id;
-    private final Long productId;
+    private final Long itemId;
     private final Long orderId;
     private int quantity;
     private final LocalDateTime createdAt;
@@ -17,14 +17,14 @@ public class OrderItem {
 
     private OrderItem(){
         this.id = BEFORE_INITIALIZED_ID;
-        this.productId = BEFORE_INITIALIZED_ID;
+        this.itemId = BEFORE_INITIALIZED_ID;
         this.orderId = BEFORE_INITIALIZED_ID;
         this.createdAt = LocalDateTime.now();
     }
 
-    public OrderItem(Long id, Long productId, Long orderId, LocalDateTime createdAt) {
+    public OrderItem(Long id, Long itemId, Long orderId, LocalDateTime createdAt) {
         this.id = id;
-        this.productId = productId;
+        this.itemId = itemId;
         this.orderId = orderId;
         this.createdAt = createdAt;
     }
@@ -38,10 +38,10 @@ public class OrderItem {
         return orderItem;
     }
 
-    public static OrderItem getInstance(Long id, Long productId, Long orderId, int quantity, LocalDateTime createdAt, LocalDateTime updatedAt){
+    public static OrderItem getInstance(Long id, Long itemId, Long orderId, int quantity, LocalDateTime createdAt, LocalDateTime updatedAt){
         validateQuantity(quantity);
 
-        OrderItem orderItem = new OrderItem(id, productId, orderId, createdAt);
+        OrderItem orderItem = new OrderItem(id, itemId, orderId, createdAt);
         orderItem.quantity = quantity;
         orderItem.updatedAt = updatedAt;
         return orderItem;
@@ -62,15 +62,23 @@ public class OrderItem {
         return id;
     }
 
-    public Long getProductId() {
-        return productId;
-    }
-
     public Long getOrderId() {
         return orderId;
     }
 
-    public long getQuantity() {
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public int getQuantity() {
         return quantity;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
