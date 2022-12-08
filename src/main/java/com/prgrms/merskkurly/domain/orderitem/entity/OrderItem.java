@@ -9,39 +9,45 @@ import java.time.LocalDateTime;
 public class OrderItem {
     private final Long BEFORE_INITIALIZED_ID = 0L;
     private final Long id;
+    private final Long memberId;
     private final Long itemId;
     private final Long orderId;
     private int quantity;
+    private boolean isOrdered;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private OrderItem(){
+    private OrderItem(Long memberId, Long itemId){
         this.id = BEFORE_INITIALIZED_ID;
-        this.itemId = BEFORE_INITIALIZED_ID;
+        this.memberId= memberId;
+        this.itemId = itemId;
         this.orderId = BEFORE_INITIALIZED_ID;
+        this.isOrdered = false;
         this.createdAt = LocalDateTime.now();
     }
 
-    public OrderItem(Long id, Long itemId, Long orderId, LocalDateTime createdAt) {
+    public OrderItem(Long id, Long memberId, Long itemId, Long orderId, boolean isOrdered, LocalDateTime createdAt) {
         this.id = id;
+        this.memberId = memberId;
         this.itemId = itemId;
         this.orderId = orderId;
+        this.isOrdered = isOrdered;
         this.createdAt = createdAt;
     }
 
-    public static OrderItem newInstance(int quantity){
+    public static OrderItem newInstance(Long memberId, Long itemId, int quantity){
         validateQuantity(quantity);
 
-        OrderItem orderItem = new OrderItem();
+        OrderItem orderItem = new OrderItem(memberId, itemId);
         orderItem.quantity = quantity;
         orderItem.updatedAt = orderItem.createdAt;
         return orderItem;
     }
 
-    public static OrderItem getInstance(Long id, Long itemId, Long orderId, int quantity, LocalDateTime createdAt, LocalDateTime updatedAt){
+    public static OrderItem getInstance(Long id, Long memberId, Long itemId, Long orderId, int quantity, boolean isOrdered, LocalDateTime createdAt, LocalDateTime updatedAt){
         validateQuantity(quantity);
 
-        OrderItem orderItem = new OrderItem(id, itemId, orderId, createdAt);
+        OrderItem orderItem = new OrderItem(id, memberId, itemId, orderId, isOrdered, createdAt);
         orderItem.quantity = quantity;
         orderItem.updatedAt = updatedAt;
         return orderItem;
@@ -58,8 +64,16 @@ public class OrderItem {
         }
     }
 
+    public boolean getIsOrdered() {
+        return isOrdered;
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public Long getMemberId(){
+        return memberId;
     }
 
     public Long getOrderId() {
