@@ -130,4 +130,10 @@ public class Member {
                     NAME_FIELD_NAME, MIN_NAME, MAX_NAME, name.length());
         }
     }
+
+    public void verifyPassword(String inputPassword) {
+        if (!password.equals(inputPassword)) {
+            throw new IllegalArgumentException("wrong username of passwowrd");
+        }
+    }
 }

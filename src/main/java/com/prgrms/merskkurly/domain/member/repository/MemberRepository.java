@@ -2,6 +2,7 @@ package com.prgrms.merskkurly.domain.member.repository;
 
 import com.prgrms.merskkurly.domain.member.entity.Member;
 import com.prgrms.merskkurly.domain.member.entity.Role;
+import java.math.BigInteger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -17,6 +18,7 @@ public class MemberRepository {
 
     private static final String INSERT = "INSERT INTO member(name, username, password, role, address, created_at, updated_at) VALUES(:name, :username, :password, :role, :address, :created_at, :updated_at)";
     private static final String FIND_BY_ID = "select * from member where id = :id";
+    private static final String FIND_BY_USERNAME = "select * from member where username = :username";
     private static final String UPDATE = "update member set password = :password, role = :role, address = :address where id = :id";
     private static final String DELETE = "delete from member where id = :id";
 
@@ -63,7 +65,7 @@ public class MemberRepository {
         int update = jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
             generatedKeyHolder);
 
-        Long id = generatedKeyHolder.getKeyAs(Long.class);
+        Long id = Objects.requireNonNull(generatedKeyHolder.getKeyAs(BigInteger.class)).longValue();
         return Member.getInstance(
             id,
             member.getName(),
@@ -102,5 +104,12 @@ public class MemberRepository {
 //            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
 //                    , CommonErrorCode.DATA_MODIFYING_ERROR);
 //        }
+    }
+
+    public Optional<Member> findByUsername(String username) {
+        return Optional.ofNullable(jdbcTemplate.queryForObject(
+            FIND_BY_USERNAME,
+            Collections.singletonMap(USERNAME, username),
+            ROW_MAPPER));
     }
 }
