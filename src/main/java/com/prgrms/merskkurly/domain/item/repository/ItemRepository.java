@@ -2,10 +2,13 @@ package com.prgrms.merskkurly.domain.item.repository;
 
 import com.prgrms.merskkurly.domain.item.entity.Category;
 import com.prgrms.merskkurly.domain.item.entity.Item;
+import com.prgrms.merskkurly.domain.item.repository.ItemSearchQuery.ItemSearchQueryBuilder;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,9 +23,9 @@ public class ItemRepository {
   private static final String FIND_BY_CATEGORY = "select * from item where category = :category";
   private static final String FIND_BY_KEYWORD = "select * from item where name like %:keyword%"; // like문
   private static final String FIND_BY_ID = "select * from item where id = :id";
-  private static final String FIND_BY_MEMBER_ID = "select * from item where member_id = :memberId";
-  private static final String FIND_BY_BUY_CNT_LIMIT = "select * from item ORDER BY buy_cnt LIMIT :score"; // 이거 맞음? & buy_cnt 인덱싱 업그레이드
-  private static final String INSERT = "INSERT INTO item(member_id, name, category, description, price, stock, buy_cnt, created_at, updated_at) VALUES(:memberId, :name, :category, :description, :price, :stock, :buyCnt, :createdAt, :updatedAt)";
+  private static final String FIND_BY_MEMBER_ID = "select * from item where member_id = :member_id";
+  private static final String FIND_BY_BUY_CNT_LIMIT = "select * from item ORDER BY buy_cnt LIMIT :limit"; // 이거 맞음? & buy_cnt 인덱싱 업그레이드
+  private static final String INSERT = "INSERT INTO item(member_id, name, category, description, price, stock, buy_cnt, created_at, updated_at) VALUES(:member_id, :name, :category, :description, :price, :stock, :buy_cnt, :created_at, :updated_at)";
   private static final String UPDATE = "update item set name = :name, category = :category, description = :description, price = :price, stock = :stock where id = :id";
   private static final String DELETE = "delete from item where id = :id";
 
@@ -77,7 +80,7 @@ public class ItemRepository {
     int update = jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
         generatedKeyHolder);
 
-    Long id = generatedKeyHolder.getKeyAs(Long.class);
+    Long id = Objects.requireNonNull(generatedKeyHolder.getKeyAs(BigInteger.class)).longValue();
     return Item.getInstance(
         id,
         item.getMemberId(),
@@ -106,17 +109,26 @@ public class ItemRepository {
   }
 
   public List<Item> findByBuyCntLimit(int limit){
-    return jdbcTemplate.queryForList(
+    return jdbcTemplate.query(
         FIND_BY_BUY_CNT_LIMIT,
         Collections.singletonMap(LIMIT, limit),
-        Item.class);
+        ROW_MAPPER);
   }
 
   public List<Item> findByMemberId(Long memberId){
-    return jdbcTemplate.queryForList(
+    return jdbcTemplate.query(
         FIND_BY_MEMBER_ID,
         Collections.singletonMap(MEMBER_ID, memberId),
-        Item.class);
+        ROW_MAPPER);
+  }
+
+  public List<Item> search(String keyword, Category category) {
+    ItemSearchQuery sql = new ItemSearchQueryBuilder()
+        .keyword(keyword)
+        .category(category)
+        .build();
+
+    return jdbcTemplate.query(sql.getQuery(), ROW_MAPPER);
   }
 
   public List<Item> findByKeyword(String keyword){

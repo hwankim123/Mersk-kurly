@@ -34,13 +34,13 @@ public class Item {
         this.createdAt = createdAt;
     }
 
-    public static Item newInstance(String name, Category category, String description, int price, int stock){
+    public static Item newInstance(Long memberId, String name, Category category, String description, int price, int stock){
         validateName(name);
         validateDescription(description);
         validatePrice(price);
         validateStock(stock);
 
-        Item item = new Item(BEFORE_INITIALIZED_ID, BEFORE_INITIALIZED_ID);
+        Item item = new Item(BEFORE_INITIALIZED_ID, memberId);
         item.name = name;
         item.category = category;
         item.description = description;
