@@ -34,7 +34,7 @@ class ItemTest {
         int stock = 1000;
 
         //when
-        Item item = Item.newInstance(name, category, description, price, stock);
+        Item item = Item.newInstance(0L, name, category, description, price, stock);
 
         //then
         assertThat(item.getName()).isEqualTo(name);
@@ -80,7 +80,7 @@ class ItemTest {
         String description = "description";
         int price = 10000;
         int stock = 1000;
-        return Item.newInstance(name, category, description, price, stock);
+        return Item.newInstance(0L, name, category, description, price, stock);
     }
 
     @Test
@@ -121,7 +121,7 @@ class ItemTest {
         int stock = 1000;
 
         //when & then
-        assertThrows(ArgumentOutOfBoundException.class, () -> Item.newInstance(wrongName, category, description, price, stock));
+        assertThrows(ArgumentOutOfBoundException.class, () -> Item.newInstance(0L, wrongName, category, description, price, stock));
     }
 
     @Test
@@ -137,7 +137,7 @@ class ItemTest {
         int stock = 1000;
 
         //when & then
-        assertThrows(ArgumentOutOfBoundException.class, () -> Item.newInstance(name, category, tooLongDescription, price, stock));
+        assertThrows(ArgumentOutOfBoundException.class, () -> Item.newInstance(0L, name, category, tooLongDescription, price, stock));
     }
 
     @ParameterizedTest
@@ -151,7 +151,7 @@ class ItemTest {
         int stock = 1000;
 
         //when & then
-        assertThrows(ArgumentOutOfBoundException.class, () -> Item.newInstance(name, category, tooLongDescription, wrongPrice, stock));
+        assertThrows(ArgumentOutOfBoundException.class, () -> Item.newInstance(0L, name, category, tooLongDescription, wrongPrice, stock));
     }
 
     @Test
