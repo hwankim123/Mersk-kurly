@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${username}
+    password: ${password}
+    url: ${url}
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true

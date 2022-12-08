@@ -2,10 +2,12 @@ package com.prgrms.merskkurly.domain.order.repository;
 
 import com.prgrms.merskkurly.domain.order.entity.Order;
 import com.prgrms.merskkurly.domain.order.entity.OrderStatus;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,18 +18,18 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class OrderRepository {
-  private static final String FIND_BY_ID = "select * from order where id = :id";
-  private static final String FIND_BY_MEMBER_ID = "select * from order where member_id = :memberId";
-  private static final String FIND_BY_MEMBER_ID_AND_ORDER_STATUS = "select * from order where member_id = :memberId and order_status = :orderStatus";
-  private static final String INSERT = "INSERT INTO order(member_id, address, order_status, created_at, updated_at) VALUES(:memberId, :address, :orderStatus, :createdAt, :updatedAt)";
-  private static final String UPDATE = "update order set address = :address where id = :id";
-  private static final String UPDATE_ORDER_STATUS = "update order set order_status = :orderStatus where id = :id";
-  private static final String DELETE = "delete from order where id = :id";
+  private static final String FIND_BY_ID = "select * from orders where id = :id";
+  private static final String FIND_BY_MEMBER_ID = "select * from orders where member_id = :member_id";
+  private static final String FIND_BY_MEMBER_ID_AND_ORDER_STATUS = "select * from orders where member_id = :member_id and order_status = :order_status";
+  private static final String INSERT = "INSERT INTO orders(member_id, address, order_status, created_at, updated_at) VALUES(:member_id, :address, :order_status, :created_at, :updated_at)";
+  private static final String UPDATE = "update orders set address = :address where id = :id";
+  private static final String UPDATE_ORDER_STATUS = "update order set order_status = :order_status where id = :id";
+  private static final String DELETE = "delete from orders where id = :id";
 
   private static final String ID = "id";
   private static final String MEMBER_ID = "member_id";
   private static final String ADDRESS = "address";
-  private static final String ORDER_STATUS = "orderStatus";
+  private static final String ORDER_STATUS = "order_status";
   private static final String CREATED_AT = "created_at";
   private static final String UPDATED_AT = "updated_at";
 
@@ -60,7 +62,7 @@ public class OrderRepository {
     int update = jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
         generatedKeyHolder);
 
-    Long id = generatedKeyHolder.getKeyAs(Long.class);
+    Long id = Objects.requireNonNull(generatedKeyHolder.getKeyAs(BigInteger.class)).longValue();
     return Order.getInstance(
         id,
         order.getMemberId(),
@@ -70,10 +72,15 @@ public class OrderRepository {
         order.getUpdatedAt());
   }
 
-  public Optional<Order> findById(Long id) {
+  public Optional<Order> findById(Long memberId, Long orderId) {
+    Map<String, Object> parameters = Map.of(
+        ID, orderId,
+        MEMBER_ID, memberId
+    );
+
     return Optional.ofNullable(jdbcTemplate.queryForObject(
         FIND_BY_ID,
-        Collections.singletonMap(ID, id),
+        parameters,
         ROW_MAPPER));
   }
 
