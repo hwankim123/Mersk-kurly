@@ -7,7 +7,6 @@ import com.prgrms.merskkurly.domain.common.exception.ForbiddenException;
 import com.prgrms.merskkurly.domain.common.exception.UnAuthorizedException;
 import com.prgrms.merskkurly.domain.item.dto.ItemRequest;
 import com.prgrms.merskkurly.domain.item.dto.ItemResponse;
-import com.prgrms.merskkurly.domain.item.dto.ItemResponse.Shortcuts;
 import com.prgrms.merskkurly.domain.item.entity.Category;
 import com.prgrms.merskkurly.domain.item.service.ItemService;
 import com.prgrms.merskkurly.domain.member.entity.Role;
@@ -18,15 +17,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/item/manage")
@@ -39,7 +30,7 @@ public class ItemManageController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Shortcuts>> showAllAdminItems(
+  public ResponseEntity<List<ItemResponse.Shortcuts>> showAllAdminItems(
       @ModelAttribute ItemRequest.SearchForm searchForm, HttpServletRequest request) {
     HttpSession session = request.getSession();
     Long memberId = (Long) session.getAttribute(ID);
@@ -52,7 +43,7 @@ public class ItemManageController {
       throw new ForbiddenException("Forbidden");
     }
 
-    List<Shortcuts> items = itemService.findAllByMemberId(memberId);
+    List<ItemResponse.Shortcuts> items = itemService.findAllByMemberId(memberId);
     return ResponseEntity.ok(items);
   }
 
@@ -171,5 +162,4 @@ public class ItemManageController {
     headers.setLocation(URI.create("/manage/item"));
     return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
   }
-
 }

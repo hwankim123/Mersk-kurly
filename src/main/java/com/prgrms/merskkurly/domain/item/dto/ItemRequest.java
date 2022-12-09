@@ -1,7 +1,6 @@
 package com.prgrms.merskkurly.domain.item.dto;
 
 import com.prgrms.merskkurly.domain.item.entity.Category;
-import java.time.LocalDateTime;
 
 public class ItemRequest {
 

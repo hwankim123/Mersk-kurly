@@ -2,12 +2,7 @@ package com.prgrms.merskkurly.domain.item.service;
 
 import com.prgrms.merskkurly.domain.common.exception.NotFoundException;
 import com.prgrms.merskkurly.domain.item.dto.ItemRequest;
-import com.prgrms.merskkurly.domain.item.dto.ItemRequest.SearchForm;
 import com.prgrms.merskkurly.domain.item.dto.ItemResponse;
-import com.prgrms.merskkurly.domain.item.dto.ItemResponse.Details;
-import com.prgrms.merskkurly.domain.item.dto.ItemResponse.Shortcuts;
-import com.prgrms.merskkurly.domain.item.dto.ItemResponse.UpdateForm;
-import com.prgrms.merskkurly.domain.item.entity.Category;
 import com.prgrms.merskkurly.domain.item.entity.Item;
 import com.prgrms.merskkurly.domain.item.repository.ItemRepository;
 import java.util.List;
@@ -24,32 +19,34 @@ public class ItemService {
 
   private final ItemRepository itemRepository;
 
-  public ItemService(ItemRepository itemRepository){
+  public ItemService(ItemRepository itemRepository) {
     this.itemRepository = itemRepository;
   }
 
   @Transactional(readOnly = true)
-  public List<ItemResponse.Shortcuts> findTopRankingItems(){
+  public List<ItemResponse.Shortcuts> findTopRankingItems() {
     List<Item> items = itemRepository.findByBuyCntLimit(TOP_RANK);
     return items.stream()
-        .map(item -> new ItemResponse.Shortcuts(item.getId(), item.getName(), item.getPrice(), item.getBuyCnt()))
+        .map(item -> new ItemResponse.Shortcuts(item.getId(), item.getName(), item.getPrice(),
+            item.getBuyCnt()))
         .collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
-  public List<Shortcuts> findAllByMemberId(Long memberId) {
+  public List<ItemResponse.Shortcuts> findAllByMemberId(Long memberId) {
     List<Item> items = itemRepository.findByMemberId(memberId);
     return items.stream()
-        .map(item -> new ItemResponse.Shortcuts(item.getId(), item.getName(), item.getPrice(), item.getBuyCnt()))
+        .map(item -> new ItemResponse.Shortcuts(item.getId(), item.getName(), item.getPrice(),
+            item.getBuyCnt()))
         .collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
-  public Details findById(Long id) {
+  public ItemResponse.Details findById(Long id) {
     Optional<Item> found = itemRepository.findById(id);
     Item item = found.orElseThrow(() -> new NotFoundException("Not Found Item id: " + id));
 
-    return Details.from(item);
+    return ItemResponse.Details.from(item);
   }
 
   public void newItem(ItemRequest.NewForm newForm) {
@@ -59,12 +56,14 @@ public class ItemService {
         newForm.getDescription(),
         newForm.getPrice(),
         newForm.getStock());
+
     itemRepository.save(item);
   }
 
-  public void update(UpdateForm updateForm) {
+  public void update(ItemResponse.UpdateForm updateForm) {
     Optional<Item> found = itemRepository.findById(updateForm.getId());
-    Item item = found.orElseThrow(() -> new NotFoundException("Not Found Item id: " + updateForm.getId()));
+    Item item = found.orElseThrow(
+        () -> new NotFoundException("Not Found Item id: " + updateForm.getId()));
 
     item.update(
         updateForm.getName(),
@@ -72,6 +71,7 @@ public class ItemService {
         updateForm.getDescription(),
         updateForm.getPrice(),
         updateForm.getStock());
+
     itemRepository.update(item);
   }
 
@@ -79,10 +79,11 @@ public class ItemService {
     itemRepository.delete(id);
   }
 
-  public List<Shortcuts> search(ItemRequest.SearchForm searchForm) {
+  public List<ItemResponse.Shortcuts> search(ItemRequest.SearchForm searchForm) {
     List<Item> result = itemRepository.search(searchForm.getKeyword(), searchForm.getCategory());
     return result.stream()
-        .map(item -> new Shortcuts(item.getId(), item.getName(), item.getPrice(), item.getBuyCnt()))
+        .map(item -> new ItemResponse.Shortcuts(item.getId(), item.getName(), item.getPrice(),
+            item.getBuyCnt()))
         .collect(Collectors.toList());
   }
 
