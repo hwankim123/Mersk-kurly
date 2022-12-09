@@ -4,7 +4,3 @@ spring:
     username: ${username}
     password: ${password}
     url: ${url}
-  mvc:
-    hiddenmethod:
-      filter:
-        enabled: true
