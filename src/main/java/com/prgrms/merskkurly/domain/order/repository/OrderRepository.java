@@ -1,5 +1,6 @@
 package com.prgrms.merskkurly.domain.order.repository;
 
+import com.prgrms.merskkurly.domain.order.dto.OrderResponse.Shortcuts;
 import com.prgrms.merskkurly.domain.order.entity.Order;
 import com.prgrms.merskkurly.domain.order.entity.OrderStatus;
 import java.math.BigInteger;
@@ -18,12 +19,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class OrderRepository {
+  private static final String FIND_ALL = "select * from orders";
   private static final String FIND_BY_ID = "select * from orders where id = :id";
   private static final String FIND_BY_MEMBER_ID = "select * from orders where member_id = :member_id";
   private static final String FIND_BY_MEMBER_ID_AND_ORDER_STATUS = "select * from orders where member_id = :member_id and order_status = :order_status";
   private static final String INSERT = "INSERT INTO orders(member_id, address, order_status, created_at, updated_at) VALUES(:member_id, :address, :order_status, :created_at, :updated_at)";
-  private static final String UPDATE = "update orders set address = :address where id = :id";
-  private static final String UPDATE_ORDER_STATUS = "update order set order_status = :order_status where id = :id";
+  private static final String UPDATE = "update orders set address = :address, order_status = :order_status where id = :id";
+  private static final String UPDATE_ORDER_STATUS = "update orders set order_status = :order_status where id = :id";
   private static final String DELETE = "delete from orders where id = :id";
 
   private static final String ID = "id";
@@ -72,7 +74,22 @@ public class OrderRepository {
         order.getUpdatedAt());
   }
 
-  public Optional<Order> findById(Long memberId, Long orderId) {
+  public List<Order> findAll() {
+
+    return jdbcTemplate.query(
+        FIND_ALL,
+        ROW_MAPPER);
+  }
+
+  public Optional<Order> findById(Long orderId) {
+
+    return Optional.ofNullable(jdbcTemplate.queryForObject(
+        FIND_BY_ID,
+        Collections.singletonMap(ID, orderId),
+        ROW_MAPPER));
+  }
+
+  public Optional<Order> findByMemberIdAndOrderId(Long memberId, Long orderId) {
     Map<String, Object> parameters = Map.of(
         ID, orderId,
         MEMBER_ID, memberId
@@ -106,6 +123,7 @@ public class OrderRepository {
   public void update(Order order) {
     Map<String, Object> parameters = Map.of(
         ADDRESS, order.getAddress(),
+        ORDER_STATUS, order.getOrderStatus().toString(),
         ID, order.getId());
     int update = jdbcTemplate.update(UPDATE, parameters);
 //        if (update == ZERO) {
@@ -115,7 +133,7 @@ public class OrderRepository {
 //        }
   }
 
-  public void updateOrderStatus(Order order){
+  public void order(Order order){
     Map<String, Object> parameters = Map.of(
         ORDER_STATUS, order.getOrderStatus().toString(),
         ID, order.getId());
@@ -129,6 +147,17 @@ public class OrderRepository {
 
   public void delete(Long id) {
     int update = jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
+//        if (update == ZERO) {
+//            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
+//                    , CommonErrorCode.DATA_MODIFYING_ERROR);
+//        }
+  }
+
+  public void updateOrderStatus(Long orderId, OrderStatus orderStatus) {
+    Map<String, Object> parameters = Map.of(
+        ORDER_STATUS, orderStatus.toString(),
+        ID, orderId);
+    int update = jdbcTemplate.update(UPDATE_ORDER_STATUS, parameters);
 //        if (update == ZERO) {
 //            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
 //                    , CommonErrorCode.DATA_MODIFYING_ERROR);

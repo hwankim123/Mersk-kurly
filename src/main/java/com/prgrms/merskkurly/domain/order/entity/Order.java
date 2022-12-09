@@ -18,9 +18,9 @@ public class Order {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Order(String address){
+    private Order(Long memberId, String address){
         this.id = BEFORE_INITIALIZED_ID;
-        this.memberId = BEFORE_INITIALIZED_ID;
+        this.memberId = memberId;
         this.address = address;
         this.orderStatus = PAYED;
         this.createdAt = LocalDateTime.now();
@@ -34,10 +34,10 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    public static Order newInstance(String address){
+    public static Order newInstance(Long memberId, String address){
         validateAddress(address);
 
-        Order order = new Order(address);
+        Order order = new Order(memberId, address);
         order.updatedAt = order.createdAt;
         return order;
     }
@@ -51,7 +51,7 @@ public class Order {
     }
 
     public void update(String newAddress) {
-        if(orderStatus == CONFIRMED){
+        if(orderStatus.equals(CONFIRMED)){
             throw new IllegalOrderStateException(CONFIRMED.name());
         }
         validateAddress(newAddress);
@@ -60,28 +60,28 @@ public class Order {
     }
 
     public void pay() {
-        if(orderStatus != CANCELED){
+        if(!orderStatus.equals(CANCELED)){
             throw new IllegalOrderStateException(PAYED.name(), orderStatus.name());
         }
         orderStatus = PAYED;
     }
 
     public void cancel() {
-        if(orderStatus != PAYED){
+        if(!orderStatus.equals(PAYED)){
             throw new IllegalOrderStateException(CANCELED.name(), orderStatus.name());
         }
         orderStatus = CANCELED;
     }
 
     public void delivery() {
-        if(orderStatus != PAYED){
+        if(!orderStatus.equals(PAYED)){
             throw new IllegalOrderStateException(ON_DELIVERY.name(), orderStatus.name());
         }
         orderStatus = ON_DELIVERY;
     }
 
     public void confirm() {
-        if(orderStatus != ON_DELIVERY){
+        if(!orderStatus.equals(ON_DELIVERY)){
             throw new IllegalOrderStateException(CONFIRMED.name(), orderStatus.name());
         }
         orderStatus = CONFIRMED;
