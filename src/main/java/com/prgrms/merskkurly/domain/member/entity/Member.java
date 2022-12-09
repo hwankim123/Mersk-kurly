@@ -18,14 +18,14 @@ public class Member {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Member(String name, String username){
+    private Member(String name, String username) {
         this.id = BEFORE_INITIALIZED_ID;
         this.name = name;
         this.username = username;
         this.createdAt = LocalDateTime.now();
     }
 
-    private Member(Long id, String name, String username, LocalDateTime createdAt){
+    private Member(Long id, String name, String username, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.username = username;
@@ -103,28 +103,28 @@ public class Member {
     }
 
     private static void validateAddress(String address) {
-        if(address.length() < MIN_ADDRESS|| MAX_ADDRESS < address.length()){
+        if (address.length() < MIN_ADDRESS || MAX_ADDRESS < address.length()) {
             throw new ArgumentOutOfBoundException(
                     ADDRESS_FIELD_NAME, MIN_ADDRESS, MAX_ADDRESS, address.length());
         }
     }
 
     private static void validatePassword(String password) {
-        if(password.length() < MIN_PASSWORD|| MAX_PASSWORD < password.length()){
+        if (password.length() < MIN_PASSWORD || MAX_PASSWORD < password.length()) {
             throw new ArgumentOutOfBoundException(
                     PASSWORD_FIELD_NAME, MIN_PASSWORD, MAX_PASSWORD, password.length());
         }
     }
 
     private static void validateUsername(String username) {
-        if(username.length() < MIN_USERNAME || MAX_USERNAME < username.length()){
+        if (username.length() < MIN_USERNAME || MAX_USERNAME < username.length()) {
             throw new ArgumentOutOfBoundException(
                     USERNAME_FIELD_NAME, MIN_USERNAME, MAX_USERNAME, username.length());
         }
     }
 
     private static void validateName(String name) {
-        if(name.length() < MIN_NAME || MAX_NAME < name.length()){
+        if (name.length() < MIN_NAME || MAX_NAME < name.length()) {
             throw new ArgumentOutOfBoundException(
                     NAME_FIELD_NAME, MIN_NAME, MAX_NAME, name.length());
         }

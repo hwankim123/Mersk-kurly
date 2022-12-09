@@ -2,7 +2,9 @@ package com.prgrms.merskkurly.domain.member.repository;
 
 import com.prgrms.merskkurly.domain.member.entity.Member;
 import com.prgrms.merskkurly.domain.member.entity.Role;
+
 import java.math.BigInteger;
+
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -61,18 +63,18 @@ public class MemberRepository {
                 UPDATED_AT, member.getUpdatedAt());
 
         jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
-            generatedKeyHolder);
+                generatedKeyHolder);
 
         Long id = Objects.requireNonNull(generatedKeyHolder.getKeyAs(BigInteger.class)).longValue();
         return Member.getInstance(
-            id,
-            member.getName(),
-            member.getUsername(),
-            member.getPassword(),
-            member.getRole(),
-            member.getAddress(),
-            member.getCreatedAt(),
-            member.getUpdatedAt());
+                id,
+                member.getName(),
+                member.getUsername(),
+                member.getPassword(),
+                member.getRole(),
+                member.getAddress(),
+                member.getCreatedAt(),
+                member.getUpdatedAt());
     }
 
     public Optional<Member> findById(Long id) {
@@ -84,10 +86,10 @@ public class MemberRepository {
 
     public void update(Member member) {
         Map<String, Object> parameters = Map.of(
-            PASSWORD, member.getPassword(),
-            ROLE, member.getRole().toString(),
-            ADDRESS, member.getAddress(),
-            ID, member.getId());
+                PASSWORD, member.getPassword(),
+                ROLE, member.getRole().toString(),
+                ADDRESS, member.getAddress(),
+                ID, member.getId());
         jdbcTemplate.update(UPDATE, parameters);
     }
 
@@ -97,8 +99,8 @@ public class MemberRepository {
 
     public Optional<Member> findByUsername(String username) {
         return Optional.ofNullable(jdbcTemplate.queryForObject(
-            FIND_BY_USERNAME,
-            Collections.singletonMap(USERNAME, username),
-            ROW_MAPPER));
+                FIND_BY_USERNAME,
+                Collections.singletonMap(USERNAME, username),
+                ROW_MAPPER));
     }
 }

@@ -3,6 +3,7 @@ package com.prgrms.merskkurly.domain.orderitem.entity;
 import static com.prgrms.merskkurly.domain.orderitem.util.OrderItemValidateFields.*;
 
 import com.prgrms.merskkurly.domain.common.exception.domain.ArgumentOutOfBoundException;
+
 import java.time.LocalDateTime;
 
 public class OrderItem {
@@ -17,9 +18,9 @@ public class OrderItem {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private OrderItem(Long memberId, Long itemId){
+    private OrderItem(Long memberId, Long itemId) {
         this.id = BEFORE_INITIALIZED_ID;
-        this.memberId= memberId;
+        this.memberId = memberId;
         this.itemId = itemId;
         this.orderId = BEFORE_INITIALIZED_ID;
         this.isOrdered = false;
@@ -35,7 +36,7 @@ public class OrderItem {
         this.createdAt = createdAt;
     }
 
-    public static OrderItem newInstance(Long memberId, Long itemId, int quantity){
+    public static OrderItem newInstance(Long memberId, Long itemId, int quantity) {
         validateQuantity(quantity);
 
         OrderItem orderItem = new OrderItem(memberId, itemId);
@@ -44,7 +45,7 @@ public class OrderItem {
         return orderItem;
     }
 
-    public static OrderItem getInstance(Long id, Long memberId, Long itemId, Long orderId, int quantity, boolean isOrdered, LocalDateTime createdAt, LocalDateTime updatedAt){
+    public static OrderItem getInstance(Long id, Long memberId, Long itemId, Long orderId, int quantity, boolean isOrdered, LocalDateTime createdAt, LocalDateTime updatedAt) {
         validateQuantity(quantity);
 
         OrderItem orderItem = new OrderItem(id, memberId, itemId, orderId, isOrdered, createdAt);
@@ -53,18 +54,18 @@ public class OrderItem {
         return orderItem;
     }
 
-    public void changeQuantity(int newQuantity){
+    public void changeQuantity(int newQuantity) {
         validateQuantity(newQuantity);
         quantity = newQuantity;
     }
 
-    public void order(Long orderId){
+    public void order(Long orderId) {
         this.orderId = orderId;
         isOrdered = true;
     }
 
     private static void validateQuantity(int newQuantity) {
-        if(newQuantity < MIN_QUANTITY){
+        if (newQuantity < MIN_QUANTITY) {
             throw new ArgumentOutOfBoundException(QUANTITY_FIELD_NAME, MIN_QUANTITY, Integer.MAX_VALUE, newQuantity);
         }
     }
@@ -77,7 +78,7 @@ public class OrderItem {
         return id;
     }
 
-    public Long getMemberId(){
+    public Long getMemberId() {
         return memberId;
     }
 

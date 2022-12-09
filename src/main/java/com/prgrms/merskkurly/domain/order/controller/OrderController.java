@@ -6,10 +6,12 @@ import com.prgrms.merskkurly.domain.common.exception.UnAuthorizedException;
 import com.prgrms.merskkurly.domain.order.dto.OrderRequest;
 import com.prgrms.merskkurly.domain.order.dto.OrderResponse;
 import com.prgrms.merskkurly.domain.order.service.OrderService;
+
 import java.net.URI;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,70 +21,70 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/order")
 public class OrderController {
 
-  private final OrderService orderService;
+    private final OrderService orderService;
 
-  public OrderController(OrderService orderService){
-    this.orderService = orderService;
-  }
-
-  @GetMapping
-  public ResponseEntity<List<OrderResponse.Shortcuts>> orders(HttpServletRequest request){
-    HttpSession session = request.getSession();
-    Long memberId = (Long) session.getAttribute(ID);
-    if (memberId == null) {
-      throw new UnAuthorizedException("UnAuthorized");
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
-    List<OrderResponse.Shortcuts> orders = orderService.findByMemberId(memberId);
-    return ResponseEntity.ok(orders);
-  }
+    @GetMapping
+    public ResponseEntity<List<OrderResponse.Shortcuts>> orders(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long memberId = (Long) session.getAttribute(ID);
+        if (memberId == null) {
+            throw new UnAuthorizedException("UnAuthorized");
+        }
 
-  @PostMapping
-  public ResponseEntity<?> order(@RequestBody OrderRequest.OrderForm orderForm, HttpServletRequest request){
-    HttpSession session = request.getSession();
-    Long memberId = (Long) session.getAttribute(ID);
-    if (memberId == null) {
-      throw new UnAuthorizedException("UnAuthorized");
+        List<OrderResponse.Shortcuts> orders = orderService.findByMemberId(memberId);
+        return ResponseEntity.ok(orders);
     }
 
-    orderService.order(memberId, orderForm);
+    @PostMapping
+    public ResponseEntity<?> order(@RequestBody OrderRequest.OrderForm orderForm, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long memberId = (Long) session.getAttribute(ID);
+        if (memberId == null) {
+            throw new UnAuthorizedException("UnAuthorized");
+        }
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setLocation(URI.create("/"));
-    return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
-  }
+        orderService.order(memberId, orderForm);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("/"));
+        return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
+    }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponse.Shortcuts> details(@PathVariable Long orderId, HttpServletRequest request){
-      HttpSession session = request.getSession();
-      Long memberId = (Long) session.getAttribute(ID);
-      if (memberId == null) {
-        throw new UnAuthorizedException("UnAuthorized");
-      }
+    public ResponseEntity<OrderResponse.Shortcuts> details(@PathVariable Long orderId, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long memberId = (Long) session.getAttribute(ID);
+        if (memberId == null) {
+            throw new UnAuthorizedException("UnAuthorized");
+        }
 
-      OrderResponse.Shortcuts order = orderService.findById(memberId, orderId);
-      return ResponseEntity.ok(order);
+        OrderResponse.Shortcuts order = orderService.findById(memberId, orderId);
+        return ResponseEntity.ok(order);
     }
 
-  @PutMapping("/{orderId}/confirm")
-  public void confirm(@PathVariable Long orderId, HttpServletRequest request){
-    HttpSession session = request.getSession();
-    Long memberId = (Long) session.getAttribute(ID);
-    if (memberId == null) {
-      throw new UnAuthorizedException("UnAuthorized");
+    @PutMapping("/{orderId}/confirm")
+    public void confirm(@PathVariable Long orderId, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long memberId = (Long) session.getAttribute(ID);
+        if (memberId == null) {
+            throw new UnAuthorizedException("UnAuthorized");
+        }
+
+        orderService.confirm(memberId, orderId);
     }
 
-    orderService.confirm(memberId, orderId);
-  }
+    @PutMapping("/{orderId}/cancel")
+    public void cancel(@PathVariable Long orderId, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long memberId = (Long) session.getAttribute(ID);
+        if (memberId == null) {
+            throw new UnAuthorizedException("UnAuthorized");
+        }
 
-  @PutMapping("/{orderId}/cancel")
-  public void cancel(@PathVariable Long orderId, HttpServletRequest request){
-    HttpSession session = request.getSession();
-    Long memberId = (Long) session.getAttribute(ID);
-    if (memberId == null) {
-      throw new UnAuthorizedException("UnAuthorized");
+        orderService.cancel(memberId, orderId);
     }
-
-    orderService.cancel(memberId, orderId);
-  }
 }

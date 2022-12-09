@@ -18,7 +18,7 @@ public class Order {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Order(Long memberId, String address){
+    private Order(Long memberId, String address) {
         this.id = BEFORE_INITIALIZED_ID;
         this.memberId = memberId;
         this.address = address;
@@ -34,7 +34,7 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    public static Order newInstance(Long memberId, String address){
+    public static Order newInstance(Long memberId, String address) {
         validateAddress(address);
 
         Order order = new Order(memberId, address);
@@ -42,7 +42,7 @@ public class Order {
         return order;
     }
 
-    public static Order getInstance(Long id, Long memberId, String address, OrderStatus orderStatus, LocalDateTime createdAt, LocalDateTime updatedAt){
+    public static Order getInstance(Long id, Long memberId, String address, OrderStatus orderStatus, LocalDateTime createdAt, LocalDateTime updatedAt) {
         validateAddress(address);
 
         Order order = new Order(id, memberId, address, orderStatus, createdAt);
@@ -51,7 +51,7 @@ public class Order {
     }
 
     public void update(String newAddress) {
-        if(orderStatus.equals(CONFIRMED)){
+        if (orderStatus.equals(CONFIRMED)) {
             throw new IllegalOrderStateException(CONFIRMED.name());
         }
         validateAddress(newAddress);
@@ -60,28 +60,28 @@ public class Order {
     }
 
     public void pay() {
-        if(!orderStatus.equals(CANCELED)){
+        if (!orderStatus.equals(CANCELED)) {
             throw new IllegalOrderStateException(PAYED.name(), orderStatus.name());
         }
         orderStatus = PAYED;
     }
 
     public void cancel() {
-        if(!orderStatus.equals(PAYED)){
+        if (!orderStatus.equals(PAYED)) {
             throw new IllegalOrderStateException(CANCELED.name(), orderStatus.name());
         }
         orderStatus = CANCELED;
     }
 
     public void delivery() {
-        if(!orderStatus.equals(PAYED)){
+        if (!orderStatus.equals(PAYED)) {
             throw new IllegalOrderStateException(ON_DELIVERY.name(), orderStatus.name());
         }
         orderStatus = ON_DELIVERY;
     }
 
     public void confirm() {
-        if(!orderStatus.equals(ON_DELIVERY)){
+        if (!orderStatus.equals(ON_DELIVERY)) {
             throw new IllegalOrderStateException(CONFIRMED.name(), orderStatus.name());
         }
         orderStatus = CONFIRMED;
@@ -112,7 +112,7 @@ public class Order {
     }
 
     private static void validateAddress(String address) {
-        if(address.length() < MIN_ADDRESS || MAX_ADDRESS < address.length()){
+        if (address.length() < MIN_ADDRESS || MAX_ADDRESS < address.length()) {
             throw new ArgumentOutOfBoundException(ADDRESS_FIELD_NAME, MIN_ADDRESS, MAX_ADDRESS, address.length());
         }
     }

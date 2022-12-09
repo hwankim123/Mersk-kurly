@@ -1,13 +1,13 @@
 package com.prgrms.merskkurly.domain.common.exception.domain;
 
-public class ArgumentOutOfBoundException extends IllegalArgumentException{
+public class ArgumentOutOfBoundException extends IllegalArgumentException {
     private static final String messageFormat = "ArgumentOutOfBoundException occurred when new instance was initialized. Field name %s should be between %d and %d. Input was %d.";
     private final String fieldName;
     private final int minBound;
     private final int maxBound;
     private final int argument;
 
-    public ArgumentOutOfBoundException(String fieldName, int minBound, int maxBound, int argument){
+    public ArgumentOutOfBoundException(String fieldName, int minBound, int maxBound, int argument) {
         super(String.format(messageFormat, fieldName, minBound, maxBound, argument));
         this.fieldName = fieldName;
         this.minBound = minBound;

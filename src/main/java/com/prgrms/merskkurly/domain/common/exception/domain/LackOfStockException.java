@@ -1,6 +1,6 @@
 package com.prgrms.merskkurly.domain.common.exception.domain;
 
-public class LackOfStockException extends RuntimeException{
+public class LackOfStockException extends RuntimeException {
     private static final String messageFormat = "LackOfStockException exception occurred when item %s was ordered. Stock was %d, but quantity of order was %d.";
     private final String itemName;
     private final int stock;

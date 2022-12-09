@@ -22,7 +22,7 @@ public class Item {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Item(Long id, Long memberId){
+    private Item(Long id, Long memberId) {
         this.id = id;
         this.memberId = memberId;
         this.createdAt = LocalDateTime.now();
@@ -34,7 +34,7 @@ public class Item {
         this.createdAt = createdAt;
     }
 
-    public static Item newInstance(Long memberId, String name, Category category, String description, int price, int stock){
+    public static Item newInstance(Long memberId, String name, Category category, String description, int price, int stock) {
         validateName(name);
         validateDescription(description);
         validatePrice(price);
@@ -51,7 +51,7 @@ public class Item {
         return item;
     }
 
-    public static Item getInstance(Long id, Long memberId, String name, Category category, String description, int price, int stock, int buyCnt, LocalDateTime createdAt, LocalDateTime updatedAt){
+    public static Item getInstance(Long id, Long memberId, String name, Category category, String description, int price, int stock, int buyCnt, LocalDateTime createdAt, LocalDateTime updatedAt) {
         validateName(name);
         validateDescription(description);
         validatePrice(price);
@@ -81,8 +81,8 @@ public class Item {
         stock = newStock;
     }
 
-    public void release(int quantity){
-        if(stock < quantity){
+    public void release(int quantity) {
+        if (stock < quantity) {
             throw new LackOfStockException(name, stock, quantity);
         }
         stock -= quantity;
@@ -129,25 +129,25 @@ public class Item {
     }
 
     private static void validateName(String name) {
-        if(MIN_NAME > name.length() || name.length() > MAX_NAME){
+        if (MIN_NAME > name.length() || name.length() > MAX_NAME) {
             throw new ArgumentOutOfBoundException(NAME_FIELD_NAME, MIN_NAME, MAX_NAME, name.length());
         }
     }
 
     private static void validateDescription(String description) {
-        if(description.length() > MAX_DESCRIPTION){
+        if (description.length() > MAX_DESCRIPTION) {
             throw new ArgumentOutOfBoundException(DESCRIPTION_FIELD_NAME, ZERO, MAX_DESCRIPTION, description.length());
         }
     }
 
     private static void validatePrice(int price) {
-        if(price < MIN_PRICE){
+        if (price < MIN_PRICE) {
             throw new ArgumentOutOfBoundException(PRICE_FIELD_NAME, MIN_PRICE, Integer.MAX_VALUE, price);
         }
     }
 
     private static void validateStock(int stock) {
-        if(stock < MIN_STOCK){
+        if (stock < MIN_STOCK) {
             throw new ArgumentOutOfBoundException(STOCK_FIELD_NAME, MIN_PRICE, Integer.MAX_VALUE, stock);
         }
     }
