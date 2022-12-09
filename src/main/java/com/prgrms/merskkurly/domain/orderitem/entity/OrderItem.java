@@ -8,10 +8,11 @@ import java.time.LocalDateTime;
 
 public class OrderItem {
     private final Long BEFORE_INITIALIZED_ID = 0L;
+
     private final Long id;
     private final Long memberId;
     private final Long itemId;
-    private final Long orderId;
+    private Long orderId;
     private int quantity;
     private boolean isOrdered;
     private final LocalDateTime createdAt;
@@ -56,6 +57,11 @@ public class OrderItem {
     public void changeQuantity(int newQuantity){
         validateQuantity(newQuantity);
         quantity = newQuantity;
+    }
+
+    public void order(Long orderId){
+        this.orderId = orderId;
+        isOrdered = true;
     }
 
     private static void validateQuantity(int newQuantity) {

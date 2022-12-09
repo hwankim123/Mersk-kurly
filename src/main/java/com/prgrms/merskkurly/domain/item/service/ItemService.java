@@ -47,12 +47,8 @@ public class ItemService {
   @Transactional(readOnly = true)
   public Details findById(Long id) {
     Optional<Item> found = itemRepository.findById(id);
+    Item item = found.orElseThrow(() -> new NotFoundException("Not Found Item id: " + id));
 
-    if(found.isEmpty()){
-      throw new NotFoundException("Not Found Item id: " + id);
-    }
-
-    Item item = found.get();
     return Details.from(item);
   }
 
@@ -88,5 +84,13 @@ public class ItemService {
     return result.stream()
         .map(item -> new Shortcuts(item.getId(), item.getName(), item.getPrice(), item.getBuyCnt()))
         .collect(Collectors.toList());
+  }
+
+  public void order(Long id, int quantity) {
+    Optional<Item> found = itemRepository.findById(id);
+    Item item = found.orElseThrow(() -> new NotFoundException("Not Found Item id: " + id));
+
+    item.release(quantity);
+    itemRepository.update(item);
   }
 }

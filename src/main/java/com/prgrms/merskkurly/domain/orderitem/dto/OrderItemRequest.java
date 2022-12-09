@@ -29,5 +29,4 @@ public class OrderItemRequest {
       this.quantity = quantity;
     }
   }
-
 }

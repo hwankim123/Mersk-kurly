@@ -1,6 +1,7 @@
 package com.prgrms.merskkurly.domain.orderitem.repository;
 
 import com.prgrms.merskkurly.domain.orderitem.entity.OrderItem;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -18,12 +19,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class OrderItemRepository {
   private static final String FIND_BY_ID = "select * from order_item where id = :id";
-  private static String FIND_BY_MEMBER_ID = "select * from order_item where member_id = :member_id";
+  private static final String FIND_BY_MEMBER_ID = "select * from order_item where member_id = :member_id";
+  private static final String FIND_BY_MEMBER_ID_AND_NOT_ORDERED = "select * from order_item where member_id = :member_id and is_ordered = :is_ordered";
   private static final String FIND_BY_ORDER_ID = "select * from order_item where order_id = :order_id";
   private static final String FIND_BY_ITEM_ID = "select * from order_item where item_id = :item_id";
-  private static final String INSERT = "INSERT INTO order_item(member_id, order_id, item_id, quantity, is_ordered, created_at, updated_at) VALUES(:member_id, :order_id, :item_id, :quantity, :is_ordered, :created_at, :updated_at)";
+  private static final String INSERT = "INSERT INTO order_item(member_id, item_id, order_id, quantity, is_ordered, created_at, updated_at) VALUES(:member_id, :item_id, :order_id, :quantity, :is_ordered, :created_at, :updated_at)";
   private static final String UPDATE = "update order_item set quantity = :quantity where id = :id";
-  private static final String ORDER = "update order_item set is_ordered = 1 where id = :id";
+  private static final String ORDER = "update order_item set order_id = :order_id, is_ordered = 1 where member_id = :member_id";
   private static final String DELETE = "delete from order_item where id = :id";
 
   private static final String ID = "id";
@@ -50,15 +52,15 @@ public class OrderItemRepository {
     boolean isOrdered = resultSet.getBoolean(IS_ORDERED);
     LocalDateTime createdAt = resultSet.getTimestamp(CREATED_AT).toLocalDateTime();
     LocalDateTime updatedAt = resultSet.getTimestamp(UPDATED_AT).toLocalDateTime();
-    return OrderItem.getInstance(id, memberId, orderId, itemId, quantity, isOrdered, createdAt, updatedAt);
+    return OrderItem.getInstance(id, memberId, itemId, orderId, quantity, isOrdered, createdAt, updatedAt);
   };
 
   public OrderItem save(OrderItem orderItem) {
     GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
     Map<String, Object> parameters = Map.of(
         MEMBER_ID, orderItem.getMemberId(),
-        ORDER_ID, orderItem.getOrderId(),
         ITEM_ID, orderItem.getItemId(),
+        ORDER_ID, orderItem.getOrderId(),
         QUANTITY, orderItem.getQuantity(),
         IS_ORDERED, orderItem.getIsOrdered(),
         CREATED_AT, orderItem.getCreatedAt(),
@@ -87,11 +89,20 @@ public class OrderItemRepository {
         ROW_MAPPER));
   }
 
-  public Optional<OrderItem> findByMemberId(Long memberId){
-    return Optional.ofNullable(jdbcTemplate.queryForObject(
+  public List<OrderItem> findByMemberId(Long memberId){
+    return jdbcTemplate.query(
         FIND_BY_MEMBER_ID,
         Collections.singletonMap(MEMBER_ID, memberId),
-        ROW_MAPPER));
+        ROW_MAPPER);
+  }
+
+  public List<OrderItem> findByMemberIdAndNotOrdered(Long memberId) {
+    Map<String, Object> parameters = Map.of(
+        MEMBER_ID, memberId,
+        IS_ORDERED, false
+    );
+
+    return jdbcTemplate.query(FIND_BY_MEMBER_ID_AND_NOT_ORDERED, parameters, ROW_MAPPER);
   }
 
   public List<OrderItem> findByOrderId(Long orderId) {
@@ -120,8 +131,11 @@ public class OrderItemRepository {
 //        }
   }
 
-  public void order(Long id) {
-    int update = jdbcTemplate.update(UPDATE, Collections.singletonMap(ID, id));
+  public void order(Long orderId, Long memberId) {
+    Map<String, Object> parameters = Map.of(
+        ORDER_ID, orderId,
+        MEMBER_ID, memberId);
+    int update = jdbcTemplate.update(ORDER, parameters);
 //        if (update == ZERO) {
 //            throw new DataModifyingException(
 //                "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
