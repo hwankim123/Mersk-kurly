@@ -3,7 +3,6 @@ package com.prgrms.merskkurly.domain.member.entity;
 import com.prgrms.merskkurly.domain.common.exception.domain.ArgumentOutOfBoundException;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 import static com.prgrms.merskkurly.domain.member.util.MemberValidateFields.*;
 
@@ -15,7 +14,7 @@ public class Member {
     private final String username;
     private String password;
     private Role role;
-    private String address; // VO로 업그레이드
+    private String address;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

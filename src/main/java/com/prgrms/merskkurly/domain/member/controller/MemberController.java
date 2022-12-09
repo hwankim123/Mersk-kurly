@@ -5,8 +5,6 @@ import static com.prgrms.merskkurly.domain.common.auth.SessionAttributes.ID;
 import com.prgrms.merskkurly.domain.common.exception.UnAuthorizedException;
 import com.prgrms.merskkurly.domain.member.dto.MemberRequest;
 import com.prgrms.merskkurly.domain.member.dto.MemberResponse;
-import com.prgrms.merskkurly.domain.member.dto.MemberResponse.Details;
-import com.prgrms.merskkurly.domain.member.dto.MemberResponse.SignupData;
 import com.prgrms.merskkurly.domain.member.entity.Role;
 import com.prgrms.merskkurly.domain.member.service.MemberService;
 import java.net.URI;
@@ -16,12 +14,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/member")
@@ -36,7 +29,7 @@ public class MemberController {
   @GetMapping("/signup")
   public ResponseEntity<MemberResponse.SignupData> signup(){
     List<Role> values = List.of(Role.values());
-    SignupData signupData = new SignupData(values);
+    MemberResponse.SignupData signupData = new MemberResponse.SignupData(values);
     return ResponseEntity.ok(signupData);
   }
 
@@ -49,7 +42,7 @@ public class MemberController {
     return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
   }
 
-  @PostMapping("/login")
+  @GetMapping("/login")
   public ResponseEntity<MemberResponse.LoginInfo> login(@RequestBody MemberRequest.LoginForm loginForm, HttpServletRequest request){
     MemberResponse.LoginInfo loginInfo = memberService.login(loginForm);
 
@@ -69,7 +62,7 @@ public class MemberController {
       throw new UnAuthorizedException("UnAuthorized");
     }
 
-    Details details = memberService.findById(id);
+    MemberResponse.Details details = memberService.findById(id);
     return ResponseEntity.ok(details);
   }
 
@@ -84,7 +77,6 @@ public class MemberController {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setLocation(URI.create("/member/mypage"));
-    System.out.println("headers.getLocation() = " + headers.getLocation());
     return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
   }
 

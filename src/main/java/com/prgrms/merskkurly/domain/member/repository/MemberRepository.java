@@ -31,8 +31,6 @@ public class MemberRepository {
     private static final String CREATED_AT = "created_at";
     private static final String UPDATED_AT = "updated_at";
 
-    private static final int ZERO = 0;
-
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public MemberRepository(DataSource dataSource) {
@@ -62,7 +60,7 @@ public class MemberRepository {
                 CREATED_AT, member.getCreatedAt(),
                 UPDATED_AT, member.getUpdatedAt());
 
-        int update = jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
+        jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
             generatedKeyHolder);
 
         Long id = Objects.requireNonNull(generatedKeyHolder.getKeyAs(BigInteger.class)).longValue();
@@ -90,20 +88,11 @@ public class MemberRepository {
             ROLE, member.getRole().toString(),
             ADDRESS, member.getAddress(),
             ID, member.getId());
-        int update = jdbcTemplate.update(UPDATE, parameters);
-//        if (update == ZERO) {
-//            throw new DataModifyingException(
-//                "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
-//                CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+        jdbcTemplate.update(UPDATE, parameters);
     }
 
     public void delete(Long id) {
-        int update = jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
-//        if (update == ZERO) {
-//            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
-//                    , CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+        jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
     }
 
     public Optional<Member> findByUsername(String username) {
