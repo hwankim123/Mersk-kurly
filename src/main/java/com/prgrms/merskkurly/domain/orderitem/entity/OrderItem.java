@@ -3,7 +3,6 @@ package com.prgrms.merskkurly.domain.orderitem.entity;
 import static com.prgrms.merskkurly.domain.orderitem.util.OrderItemValidateFields.*;
 
 import com.prgrms.merskkurly.domain.common.exception.domain.ArgumentOutOfBoundException;
-import com.prgrms.merskkurly.domain.orderitem.util.OrderItemValidateFields;
 import java.time.LocalDateTime;
 
 public class OrderItem {

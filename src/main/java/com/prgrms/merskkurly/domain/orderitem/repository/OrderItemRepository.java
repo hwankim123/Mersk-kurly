@@ -67,7 +67,7 @@ public class OrderItemRepository {
         UPDATED_AT, orderItem.getUpdatedAt()
     );
 
-    int update = jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
+    jdbcTemplate.update(INSERT, new MapSqlParameterSource(parameters),
         generatedKeyHolder);
 
     Long id = Objects.requireNonNull(generatedKeyHolder.getKeyAs(BigInteger.class)).longValue();
@@ -123,31 +123,17 @@ public class OrderItemRepository {
     Map<String, Object> parameters = Map.of(
         QUANTITY, order.getQuantity(),
         ID, order.getId());
-    int update = jdbcTemplate.update(UPDATE, parameters);
-//        if (update == ZERO) {
-//            throw new DataModifyingException(
-//                "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
-//                CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+    jdbcTemplate.update(UPDATE, parameters);
   }
 
   public void order(Long orderId, Long memberId) {
     Map<String, Object> parameters = Map.of(
         ORDER_ID, orderId,
         MEMBER_ID, memberId);
-    int update = jdbcTemplate.update(ORDER, parameters);
-//        if (update == ZERO) {
-//            throw new DataModifyingException(
-//                "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
-//                CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+    jdbcTemplate.update(ORDER, parameters);
   }
 
   public void delete(Long id) {
-    int update = jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
-//        if (update == ZERO) {
-//            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
-//                    , CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+    jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
   }
 }

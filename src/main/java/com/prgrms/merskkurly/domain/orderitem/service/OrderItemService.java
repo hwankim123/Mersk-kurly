@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class OrderItemService {
 
   private final OrderItemRepository orderItemRepository;
@@ -23,19 +25,7 @@ public class OrderItemService {
     this.itemRepository = itemRepository;
   }
 
-  public void add(Long memberId, OrderItemRequest.AddForm addForm) {
-    Optional<Item> found = itemRepository.findById(addForm.getItemId()); // memberId도 넘겨주기
-
-    if(found.isEmpty()){
-      throw new NotFoundException("Item Not Found : " + addForm.getItemId());
-    }
-
-    OrderItem orderItem = OrderItem.newInstance(
-        memberId, addForm.getItemId(), addForm.getQuantity());
-
-    orderItemRepository.save(orderItem); // save or update
-  }
-
+  @Transactional(readOnly = true)
   public List<OrderItem> findByMemberId(Long memberId) {
     List<OrderItem> orderItems = orderItemRepository.findByMemberId(memberId);
     if(orderItems.isEmpty()){
@@ -45,6 +35,7 @@ public class OrderItemService {
     return orderItems;
   }
 
+  @Transactional(readOnly = true)
   public List<OrderItemResponse.Details> findByMemberIdAndNotOrdered(Long memberId) {
     List<OrderItem> orderItems = orderItemRepository.findByMemberIdAndNotOrdered(memberId);
     if(orderItems.isEmpty()){
@@ -55,6 +46,18 @@ public class OrderItemService {
         .map(OrderItemResponse.Details::from)
         .collect(Collectors.toList());
   }
+
+  public void add(Long memberId, OrderItemRequest.AddForm addForm) {
+    Optional<Item> found = itemRepository.findById(addForm.getItemId());
+    Item item = found.orElseThrow(
+        () -> new NotFoundException("Item Not Found : " + addForm.getItemId()));
+
+    OrderItem orderItem = OrderItem.newInstance(
+        memberId, item.getId(), addForm.getQuantity());
+
+    orderItemRepository.save(orderItem);
+  }
+
 
   public void order(Long orderId, Long memberId) {
     orderItemRepository.order(orderId, memberId);
