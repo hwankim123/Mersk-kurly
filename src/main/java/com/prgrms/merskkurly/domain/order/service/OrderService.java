@@ -32,20 +32,6 @@ public class OrderService {
     this.itemService = itemService;
   }
 
-  public void order(Long memberId, OrderRequest.OrderForm orderForm) {
-    List<OrderItemResponse.Details> detailsList = orderItemService.findByMemberIdAndNotOrdered(memberId);
-
-    Order order = Order.newInstance(memberId, orderForm.getAddress());
-    Order savedOrder = orderRepository.save(order);
-    detailsList.forEach(details -> {
-      OrderItem orderItem = details.mapToOrderItem();
-      orderItem.order(savedOrder.getId());
-      itemService.order(orderItem.getItemId(), orderItem.getQuantity());
-    });
-    orderItemService.order(savedOrder.getId(), memberId);
-
-  }
-
   @Transactional(readOnly = true)
   public List<OrderResponse.Shortcuts> findAll() {
     List<Order> orders = orderRepository.findAll();
@@ -67,14 +53,24 @@ public class OrderService {
   @Transactional(readOnly = true)
   public OrderResponse.Shortcuts findById(Long memberId, Long orderId) {
     Optional<Order> found = orderRepository.findByMemberIdAndOrderId(memberId, orderId);
-
-    if(found.isEmpty()){
-      throw new NotFoundException("Not Found Order id: " + orderId);
-    }
+    found.orElseThrow(() -> new NotFoundException("Not Found Order id: " + orderId));
 
     Order order = found.get();
     return new OrderResponse.Shortcuts(
         order.getId(), order.getAddress(), order.getOrderStatus(), order.getCreatedAt());
+  }
+
+  public void order(Long memberId, OrderRequest.OrderForm orderForm) {
+    List<OrderItemResponse.Details> detailsList = orderItemService.findByMemberIdAndNotOrdered(memberId);
+
+    Order order = Order.newInstance(memberId, orderForm.getAddress());
+    Order savedOrder = orderRepository.save(order);
+    detailsList.forEach(details -> {
+      OrderItem orderItem = details.mapToOrderItem();
+      orderItem.order(savedOrder.getId());
+      itemService.order(orderItem.getItemId(), orderItem.getQuantity());
+    });
+    orderItemService.order(savedOrder.getId(), memberId);
   }
 
   public void delivery(Long orderId) {

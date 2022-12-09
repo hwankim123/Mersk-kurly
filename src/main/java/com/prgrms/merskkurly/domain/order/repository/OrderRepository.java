@@ -25,7 +25,6 @@ public class OrderRepository {
   private static final String FIND_BY_MEMBER_ID_AND_ORDER_STATUS = "select * from orders where member_id = :member_id and order_status = :order_status";
   private static final String INSERT = "INSERT INTO orders(member_id, address, order_status, created_at, updated_at) VALUES(:member_id, :address, :order_status, :created_at, :updated_at)";
   private static final String UPDATE = "update orders set address = :address, order_status = :order_status where id = :id";
-  private static final String UPDATE_ORDER_STATUS = "update orders set order_status = :order_status where id = :id";
   private static final String DELETE = "delete from orders where id = :id";
 
   private static final String ID = "id";
@@ -125,42 +124,17 @@ public class OrderRepository {
         ADDRESS, order.getAddress(),
         ORDER_STATUS, order.getOrderStatus().toString(),
         ID, order.getId());
-    int update = jdbcTemplate.update(UPDATE, parameters);
-//        if (update == ZERO) {
-//            throw new DataModifyingException(
-//                "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
-//                CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+    jdbcTemplate.update(UPDATE, parameters);
   }
 
   public void order(Order order){
     Map<String, Object> parameters = Map.of(
         ORDER_STATUS, order.getOrderStatus().toString(),
         ID, order.getId());
-    int update = jdbcTemplate.update(UPDATE, parameters);
-//        if (update == ZERO) {
-//            throw new DataModifyingException(
-//                "Nothing was updated. query: " + UPDATE + " params: " + Member.getUUID() + ", " + Member.getDiscountAmount(),
-//                CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+    jdbcTemplate.update(UPDATE, parameters);
   }
 
   public void delete(Long id) {
-    int update = jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
-//        if (update == ZERO) {
-//            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
-//                    , CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
-  }
-
-  public void updateOrderStatus(Long orderId, OrderStatus orderStatus) {
-    Map<String, Object> parameters = Map.of(
-        ORDER_STATUS, orderStatus.toString(),
-        ID, orderId);
-    int update = jdbcTemplate.update(UPDATE_ORDER_STATUS, parameters);
-//        if (update == ZERO) {
-//            throw new DataModifyingException("Nothing was deleted. query: " + DELETE + " params: " + id
-//                    , CommonErrorCode.DATA_MODIFYING_ERROR);
-//        }
+    jdbcTemplate.update(DELETE, Collections.singletonMap(ID, id.toString()));
   }
 }

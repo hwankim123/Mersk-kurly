@@ -51,19 +51,4 @@ public class OrderResponse {
       this.createdAt = createdAt;
     }
   }
-
-  public static class Details {
-    private Long id;
-    private Long memberId;
-    private String address;
-    private OrderStatus orderStatus;
-
-    public static Details from(Order order) {
-      Details details = new Details();
-
-      //dosomething...
-
-      return details;
-    }
-  }
 }

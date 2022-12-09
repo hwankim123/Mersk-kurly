@@ -38,7 +38,7 @@ public class OrderManagerController {
     }
 
     Role role = Role.valueOf((String) session.getAttribute(ROLE));
-    if (role.equals(Role.USER)) {
+    if (role.equals(Role.USER) || role.equals(Role.ADMIN)) {
       throw new ForbiddenException("Forbidden");
     }
 
